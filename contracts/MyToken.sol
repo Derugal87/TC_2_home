@@ -10,9 +10,9 @@ contract MyToken {
     mapping(address => mapping(address => uint)) public _allowance;
     mapping(address => bool) public _blacklist;
 
-    string public name = "NewToken";
-    string public symbol = "NT";
-    uint8 public decimal = 18;
+    string public _name = "NewToken";
+    string public _symbol = "NT";
+    uint8 public _decimals = 18;
 
     event Transfer(address indexed from, address indexed to, uint amount);
     event Approve(address indexed owner, address indexed spender, uint amount);
@@ -26,8 +26,18 @@ contract MyToken {
         _;
     }
 
-    function blacklisted(address _address) external OnlyOwner {
-        require(!_blacklist[_address], "blacklisted");
+    function name() public view returns (string memory) {
+        return _name;
+    }
+    function symbol() public view returns (string memory) {
+        return _symbol;
+    }
+    function decimals() public view returns (uint8) {
+        return _decimals;
+    }
+
+    function to_blacklist(address _address) external OnlyOwner {
+        require(!_blacklist[_address], "this address is now blacklisted");
         _blacklist[_address] = true;
     }
 
@@ -51,10 +61,11 @@ contract MyToken {
         return _allowance[_owner][spender];
     }
 
-    // function mint(address _account, uint amount) external OnlyOwner { 
-    //     _balanceOf[_account] += amount;
-    //     _totalSupply += amount;
-    // }    
+    function mint() external OnlyOwner { 
+        uint amount = 500000000000000000000;
+        _balanceOf[msg.sender] += amount;
+        _totalSupply += amount;
+    }    
     
     function approve(address spender, uint amount) external returns(bool) {
         _allowance[msg.sender][spender] = amount;
