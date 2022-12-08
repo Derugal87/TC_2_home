@@ -1,15 +1,19 @@
+require('dotenv').config();
 const { ethers } = require("ethers");
-const provider = new ethers.providers.JsonRpcProvider(
-	"https://data-seed-prebsc-1-s1.binance.org:8545"
-);
+const provider = new ethers.providers.JsonRpcProvider("https://bsctestapi.terminet.io/rpc");
 
-const address = "0xC732bC776A663BeF904eb4D6eC5F7F4303cCC5BF";
+const address = "0xd9485dC1128ceC47221Cbc395C41D58F0Fb7Ca53";
 
-const private = "d1f75406a991ec8c1ad5ba41ce37e4dd5cbc196fe58f52c06a098bc639169de4";
+const private = process.env.PRIVATE;
 
 const wallet = new ethers.Wallet(private, provider);
 
 const ABI = [
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
   {
     "anonymous": false,
     "inputs": [
@@ -255,18 +259,7 @@ const ABI = [
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_account",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
+    "inputs": [],
     "name": "mint",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -393,26 +386,29 @@ const ABI = [
 ];
 
 const contract = new ethers.Contract(address, ABI, provider);
+const connectWithWallet = contract.connect(wallet);
+const to = "0xEBCf0F411C48b61d1B2cB53D4E547C2299E8769b";
 
 async function do_transter() {
-	const to = "0xEBCf0F411C48b61d1B2cB53D4E547C2299E8769b";
-  const amount = BigInt(1000000000000000000000);
-	const connectWithWallet = contract.connect(wallet);
+  
+  const transfer_amount = 100000000000000000000n;
 	console.log("before ", await connectWithWallet.balanceOf(to));
-	const tx = await connectWithWallet.transfer(to, amount);
+	const tx = await connectWithWallet.transfer(to, transfer_amount);
 	await tx.wait();
 	console.log("after ", await connectWithWallet.balanceOf(to));
 	console.log(tx);
 }
 
 async function push_to_blacklist() {
-	const blacklisted = "0xEBCf0F411C48b61d1B2cB53D4E547C2299E8769b";
-	const connectWithWallet = contract.connect(wallet);
-	const tx = await connectWithWallet.to_blacklist(blacklisted);
+	const tx = await connectWithWallet.to_blacklist(to);
   await tx.wait();
   console.log("blacklisted");
 	console.log(tx);
 }
 
-do_transter();
-//push_to_blacklist();
+function main() {
+  do_transter();
+  push_to_blacklist();
+}
+
+main();
